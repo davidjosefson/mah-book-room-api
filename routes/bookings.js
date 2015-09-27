@@ -1,5 +1,6 @@
 var express = require('express');
 var request = require('request');
+var Booking = require('../models/booking');
 var basicAuth = require('basic-auth');
 var router = express.Router();
 
@@ -24,7 +25,9 @@ router.post('/', function(req, res, next) {
 
   performExternalBooking(user.name, user.pass, req.body.room, req.body.date, req.body.time, function(err, result)  {
     if (!err) {
-      res.send('Room ' + req.body.room + ' was booked at ' + req.body.date + ' ' + req.body.time);
+      var booking = new Booking(req.body.room, req.body.date, req.body.time);
+      // res.send('Room ' + req.body.room + ' was booked at ' + req.body.date + ' ' + req.body.time);
+      res.json(booking);
     } else  {
       res.status(500).send(err);
     }

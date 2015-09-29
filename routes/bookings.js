@@ -2,15 +2,16 @@ var express = require('express');
 var request = require('request');
 var Booking = require('../models/booking');
 var basicAuth = require('basic-auth');
+var validators = require('../utils/validators');
 var router = express.Router();
 
 /* GET to /bookings: get all bookings for user */
-router.get('/', function(req, res, next) {
+router.get('/', validateUserAndPass, function(req, res, next) {
   res.send('GET BOOKINGS');
 });
 
 /* POST to /bookings: create a booking */
-router.post('/', function(req, res, next) {
+router.post('/', validateUserAndPass, validatePostBody, function(req, res, next) {
   /*
     1. validate post body parameters
       - room
@@ -29,10 +30,55 @@ router.post('/', function(req, res, next) {
       // res.send('Room ' + req.body.room + ' was booked at ' + req.body.date + ' ' + req.body.time);
       res.json(booking);
     } else  {
-      res.status(500).send(err);
+      res.status(500).json({
+        error: err
+      });
     }
   });
 });
+
+function validateUserAndPass(req, res, next) {
+  var user = basicAuth(req);
+
+  if (!user ||  !user.name  ||  !user.pass) {
+    res.set('WWW-Authenticate', 'Basic realm="example"');
+    res.status(401).json({
+      error: "Username and/or password was not provided through HTTP Basic Authentication"
+    });
+  } else {
+    req.semiValidUser = user;
+    next();
+  }
+}
+
+function validatePostBody(req, res, next) {
+  var roomResult = validators.room(req.body.room);
+  var dateResult = validators.date(req.body.date);
+  var timeResult = validators.time(req.body.time);
+  var combinedError = [];
+
+  if (roomResult instanceof Error) {
+    combinedError.push({
+      error: roomResult.message
+    });
+  }
+  if (dateResult instanceof Error) {
+    combinedError.push({
+      error: dateResult.message
+    });
+  }
+  if (timeResult instanceof Error) {
+    combinedError.push({
+      error: timeResult.message
+    });
+  }
+
+  if (combinedError.length > 0) {
+    res.status(400).json(combinedError);
+  } else {
+    next();
+  }
+}
 
 function performExternalBooking(user, pass, room, date, time, callback)  {
   // sets a new cookie jar for each request

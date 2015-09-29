@@ -1,5 +1,6 @@
 var expect = require('chai').expect;
 var validators = require('../../utils/validators');
+var constants = require('../../constants/constants');
 
 describe('Testing the validators', function()  {
   // describe('Testing the username validator', function() {
@@ -13,7 +14,7 @@ describe('Testing the validators', function()  {
   //     expect(validators.user()).to.be.an.instanceof(Error);
   //   });
   //   it('should return true if input is a string', function()  {
-  //     expect(validators.user("myusername")).to.equal(true);
+  //     expect(validators.user('myusername')).to.equal(true);
   //   });
   // });
   // describe('Testing the password validator', function() {
@@ -27,7 +28,7 @@ describe('Testing the validators', function()  {
   //     expect(validators.pass()).to.be.an.instanceof(Error);
   //   });
   //   it('should return true if input is a string', function()  {
-  //     expect(validators.pass("mypassword")).to.equal(true);
+  //     expect(validators.pass('mypassword')).to.equal(true);
   //   });
   // });
   describe('Testing the room validator', function() {
@@ -44,7 +45,7 @@ describe('Testing the validators', function()  {
       expect(validators.room(0506)).to.be.an.instanceof(Error);
     });
     it('should return false if input formatted correctly but not listed in constants.ROOMS', function()  {
-      expect(validators.room("nia0909")).to.be.an.instanceof(Error);
+      expect(validators.room('nia0909')).to.be.an.instanceof(Error);
     });
     it('should return false if input is formatted as the urlRoom', function()  {
       expect(validators.room('NI%3AA0506')).to.be.an.instanceof(Error);
@@ -53,7 +54,7 @@ describe('Testing the validators', function()  {
       expect(validators.room('NI:A0506')).to.be.an.instanceof(Error);
     });
     it('should return true if input is an id listed in constants.ROOMS', function()  {
-      expect(validators.room('nia0506')).to.equal(true);
+      expect(validators.room('nia0506')).to.equal(constants.ROOMS['nia0506']);
     });
   });
 
@@ -77,7 +78,7 @@ describe('Testing the validators', function()  {
       expect(validators.time(1)).to.be.an.instanceof(Error);
     });
     it('should return true if input is listed in constants.TIMES', function()  {
-      expect(validators.time('08151000')).to.equal(true);
+      expect(validators.time('08151000')).to.equal(constants.TIMES['08151000']);
     });
   });
 
@@ -95,16 +96,16 @@ describe('Testing the validators', function()  {
       expect(validators.date(20151224)).to.be.an.instanceof(Error);
     });
     it('should return false if input in the wrong format (YY-MM-DD)', function()  {
-      expect(validators.date("15-10-31")).to.be.an.instanceof(Error);
+      expect(validators.date('15-10-31')).to.be.an.instanceof(Error);
     });
     it('should return false if input is in wrong format (DDMMYY)', function()  {
-      expect(validators.date("31102015")).to.be.an.instanceof(Error);
+      expect(validators.date('31102015')).to.be.an.instanceof(Error);
     });
     it('should return false if input is in wrong format (DD-MM-YYYY)', function()  {
-      expect(validators.date("31-10-2015")).to.be.an.instanceof(Error);
+      expect(validators.date('31-10-2015')).to.be.an.instanceof(Error);
     });
     it('should return true if input correctly formatted, as YYYY-MM-DD', function()  {
-      expect(validators.date("2016-05-26")).to.equal(true);
+      expect(validators.date('2016-05-26')).to.equal('2016-05-26');
     });
   });
 });

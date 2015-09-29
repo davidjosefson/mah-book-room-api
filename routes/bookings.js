@@ -17,7 +17,8 @@ router.post('/', validateUserAndPass, validatePostBody, function(req, res, next)
       var booking = bookingModel.getSingleBooking(req.postBodyValidationResult.room.id, req.postBodyValidationResult.date, req.postBodyValidationResult.time.id);
       res.json(booking);
     } else  {
-      res.status(err.code).json({
+      res.status(err.status).json({
+        status: err.status,
         error: err.message
       });
     }
@@ -62,23 +63,23 @@ function performExternalBooking(userAndPassword, postBodyObjects, callback)  {
 
                 if (body.match(/\bBokningen gick inte att spara pga kollision med följande resurser\b/i))  {
                   var error = new Error('The chosen room was already booked for that date and time. Room ' + postBodyObjects.room.name + ', date ' + postBodyObjects.date + ', time ' + postBodyObjects.time.name);
-                  error.code = 409; // conflict
+                  error.status = 409; // conflict
                   callback(error, null);
 
                 } else if (body.match(/\bDin användare har inte rättigheter att skapa resursbokningar\b/i)) {
                   var error = new Error('Your user credentials aren\'t valid');
-                  error.code = 401; // authentication failed
+                  error.status = 401; // authentication failed
                   callback(error, null);
 
                 } else if (body.match(/\bEj bokbar\b/i)) {
                   var error = new Error('Internal error. schema.mah.se didn\'t accept the url parameters.');
-                  error.code = 500;
+                  error.status = 500;
                   callback(error, null);
 
                 } else {
                   // 200 OK but not a known error message from schema.mah.se
                   var error = new Error('The following error was received from schema.mah.se: ' + body);
-                  error.code = 500;
+                  error.status = 500;
                   callback(error, null);
                 }
 
@@ -89,14 +90,14 @@ function performExternalBooking(userAndPassword, postBodyObjects, callback)  {
             } else {
               // If booking request failed (schema.mah.se sent something other than 200 OK)
               var error = new Error('Internal error. Booking request failed, schema.mah.se/ajax/ajax_resursbokning.jsp is probably out of reach. This message was sent from schema.mah.se: ' + err.message);
-              error.code = 500;
+              error.status = 500;
               callback(error, null);
             }
           });
         } else {
           // If login request failed
           var error = new Error('Login request to schema.mah.se failed. Either your login credentials are wrong or schema.mah.se/login_do.jsp is out of reach.');
-          error.code = 500;
+          error.status = 500;
           callback(error, null);
         }
       });
@@ -104,7 +105,7 @@ function performExternalBooking(userAndPassword, postBodyObjects, callback)  {
     } else {
       // If handshake request failed
       var error = new Error('Internal error. Handshake request failed, schema.mah.se is probably down.');
-      error.code = 500;
+      error.status = 500;
       callback(error, null);
     }
   });

@@ -1,6 +1,6 @@
 var express = require('express');
 var request = require('request');
-var Booking = require('../models/booking');
+var bookingModel = require('../models/booking');
 var basicAuth = require('basic-auth');
 var validators = require('../utils/validators');
 var router = express.Router();
@@ -21,13 +21,9 @@ router.post('/', validateUserAndPass, validatePostBody, function(req, res, next)
     3. create a json-response of the booking information
   */
 
-  //Get username and password (HTTP Basic Authentication)
-  var user = basicAuth(req);
-
-  performExternalBooking(user.name, user.pass, req.body.room, req.body.date, req.body.time, function(err, result)  {
+  performExternalBooking(req.semiValidUser.name, req.semiValidUser.pass, req.body.room, req.body.date, req.body.time, function(err, result)  {
     if (!err) {
-      var booking = new Booking(req.body.room, req.body.date, req.body.time);
-      // res.send('Room ' + req.body.room + ' was booked at ' + req.body.date + ' ' + req.body.time);
+      var booking = bookingModel.getSingleBooking(req.body.room, req.body.date, req.body.time);
       res.json(booking);
     } else  {
       res.status(500).json({
@@ -81,6 +77,9 @@ function validatePostBody(req, res, next) {
 }
 
 function performExternalBooking(user, pass, room, date, time, callback)  {
+  // strips the two first digits of the year from date string
+  var strippedDate = stripTwoDigitsFromYear(date);
+
   // sets a new cookie jar for each request
   var j = request.jar();
 
@@ -99,7 +98,7 @@ function performExternalBooking(user, pass, room, date, time, callback)  {
     }, function(err, httpResponse2, body) {
       if (!err) {
         request({
-          url: 'https://schema.mah.se/ajax/ajax_resursbokning.jsp?op=boka&datum=' + date + '&id=' + room + '&typ=RESURSER_LOKALER&intervall=' + time + '&moment=DJ&flik=FLIK-0017',
+          url: 'https://schema.mah.se/ajax/ajax_resursbokning.jsp?op=boka&datum=' + strippedDate + '&id=' + room + '&typ=RESURSER_LOKALER&intervall=' + time + '&moment=DJ&flik=FLIK-0017',
           jar: j
         }, function(err, httpResponse3, body) {
           if (!err) {
@@ -127,6 +126,10 @@ function performExternalBooking(user, pass, room, date, time, callback)  {
       }
     });
   });
+}
+
+var stripTwoDigitsFromYear = function(date) {
+  return date.substring(2);
 }
 
 module.exports = router;

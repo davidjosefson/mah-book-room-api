@@ -13,15 +13,11 @@ router.get('/', validateUserAndPass, function(req, res, next) {
 /* POST to /bookings: create a booking */
 router.post('/', validateUserAndPass, validatePostBody, function(req, res, next) {
   /*
-    1. validate post body parameters
-      - room
-      - date
-      - time
     2. perform request-get to schema.mah.se
     3. create a json-response of the booking information
   */
 
-  performExternalBooking(req.semiValidUser.name, req.semiValidUser.pass, req.body.room, req.body.date, req.body.time, function(err, result)  {
+  performExternalBooking(req.semiValidUser, req.body, function(err, result)  {
     if (!err) {
       var booking = bookingModel.getSingleBooking(req.body.room, req.body.date, req.body.time);
       res.json(booking);
@@ -76,9 +72,9 @@ function validatePostBody(req, res, next) {
   }
 }
 
-function performExternalBooking(user, pass, room, date, time, callback)  {
+function performExternalBooking(userAndPassword, postBody, callback)  {
   // strips the two first digits of the year from date string
-  var strippedDate = stripTwoDigitsFromYear(date);
+  var strippedDate = stripTwoDigitsFromYear(postBody.date);
 
   // sets a new cookie jar for each request
   var j = request.jar();
@@ -91,14 +87,14 @@ function performExternalBooking(user, pass, room, date, time, callback)  {
       method: 'POST',
       url: 'https://schema.mah.se/login_do.jsp',
       form: {
-        password: pass,
-        username: user
+        password: userAndPassword.pass,
+        username: userAndPassword.user
       },
       jar: j
     }, function(err, httpResponse2, body) {
       if (!err) {
         request({
-          url: 'https://schema.mah.se/ajax/ajax_resursbokning.jsp?op=boka&datum=' + strippedDate + '&id=' + room + '&typ=RESURSER_LOKALER&intervall=' + time + '&moment=DJ&flik=FLIK-0017',
+          url: 'https://schema.mah.se/ajax/ajax_resursbokning.jsp?op=boka&datum=' + strippedDate + '&id=' + postBody.room + '&typ=RESURSER_LOKALER&intervall=' + postBody.time + '&moment= &flik=FLIK-0017',
           jar: j
         }, function(err, httpResponse3, body) {
           if (!err) {

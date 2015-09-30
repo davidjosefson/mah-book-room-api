@@ -11,6 +11,19 @@ var Room = function(roomId) {
   }
 }
 
+var Rooms = function() {
+  this.rooms = [];
+  this._links = {
+    self: {
+      href: '/rooms'
+    }
+  };
+
+  for (var room in constants.ROOMS) {
+    this.rooms.push(new Room(room));
+  }
+}
+
 var roomModel = {};
 
 roomModel.getSingleRoom = function(roomId) {
@@ -18,11 +31,7 @@ roomModel.getSingleRoom = function(roomId) {
 }
 
 roomModel.getAllRooms = function() {
-  rooms = [];
-  for (var room in constants.ROOMS) {
-    rooms.push(new Room(room));
-  }
-  return rooms;
+  return new Rooms();
 }
 
 module.exports = roomModel;

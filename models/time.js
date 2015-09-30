@@ -11,6 +11,30 @@ var Time = function(timeId) {
   }
 }
 
+var Times = function() {
+  this.times = [];
+  this._links = {
+    self: {
+      href: '/times'
+    }
+  };
+
+  for (var time in constants.TIMES) {
+    this.times.push(new Time(time));
+  }
+
+  // sorts array based on id to get 08:15-10:00 first instead of last
+  this.times.sort(function(a, b) {
+    if (a.id > b.id) {
+      return 1;
+    }
+    if (a.id < b.id) {
+      return -1;
+    }
+    return 0;
+  });
+}
+
 var timeModel = {};
 
 timeModel.getSingleTime = function(timeId) {
@@ -18,11 +42,7 @@ timeModel.getSingleTime = function(timeId) {
 }
 
 timeModel.getAllTimes = function() {
-  times = [];
-  for (var time in constants.TIMES) {
-    times.push(new Time(time));
-  }
-  return times;
+  return new Times();
 }
 
 

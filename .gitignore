@@ -1,6 +1,13 @@
 # TODO-file
 todo
 
+# Heroku
+/*.env
+Procfile
+
+# Mac
+.DS_Store
+
 # Logs
 logs
 *.log

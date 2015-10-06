@@ -4,6 +4,7 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 // var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var cors = require('cors');
 
 var root = require('./routes/index');
 var bookings = require('./routes/bookings');
@@ -25,6 +26,9 @@ app.use(bodyParser.json());
 
 // allow access to public folder
 app.use(express.static(path.join(__dirname, 'public')));
+
+// enables pre-flight cors for all routes
+app.options('*', cors());
 
 // routes
 app.use('/', root);

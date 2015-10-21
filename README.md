@@ -13,7 +13,12 @@ A RESTful Web API written in Javascript (NodeJS, ExpressJS) to allow students at
 [https://mah-book-room-api.herokuapp.com/](https://mah-book-room-api.herokuapp.com/)
 
 ## Endpoints
-All responses are `application/json`.
+All responses are in `application/json`.
+
+The following three endpoints exists in the API:
+* `/rooms`
+* `/times`
+* `/bookings`
 
 ### GET /rooms
 Provides an array of all rooms available for booking rooms through the API.

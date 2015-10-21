@@ -4,6 +4,7 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 // var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var cors = require('cors');
 
 var root = require('./routes/index');
 var bookings = require('./routes/bookings');
@@ -11,6 +12,10 @@ var rooms = require('./routes/rooms');
 var times = require('./routes/times');
 
 var app = express();
+
+// enables pre-flight CORS for all routes
+app.options('*', cors());
+app.use(cors());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -39,29 +44,14 @@ app.use(function(req, res, next) {
   next(err);
 });
 
-// error handlers
-
-// development error handler
-// will print stacktrace
-if (app.get('env') === 'development') {
-  app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-    res.render('error', {
-      message: err.message,
-      error: err
-    });
-  });
-}
-
 // production error handler
 // no stacktraces leaked to user
 app.use(function(err, req, res, next) {
-  res.status(err.status || 500);
-  res.render('error', {
-    message: err.message,
-    error: {}
+  var status = (err.status ||  500);
+  res.status(status).json({
+    status: status,
+    error: err.message,
   });
 });
-
 
 module.exports = app;

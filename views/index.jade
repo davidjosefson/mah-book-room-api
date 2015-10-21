@@ -1,5 +1,14 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+  h1 mah-book-room-api
+  p A RESTful Web API written in Javascript (NodeJS, ExpressJS) to allow students at Malmö university easy access to book rooms at the Niagara building using their login credentials for Kronox Resursbokning.
+  h2 Endpoints
+  ul
+    li: a(href='rooms') /rooms
+    li: a(href='times') /times
+    li: a(href='bookings') /bookings
+
+  h2 API documentation
+  p ... can be found here:
+  a(href='https://github.com/davidjosefson/mah-book-room-api') https://github.com/davidjosefson/mah-book-room-api

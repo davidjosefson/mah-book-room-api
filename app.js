@@ -15,7 +15,7 @@ var env = process.env.NODE_ENV || 'development';
 
 var app = express();
 
-// redirects to HTTPS on Heroku (http://jaketrent.com/post/https-redirect-node-heroku/)
+// redirects to HTTPS on Heroku (http://jaketrent.com/post/https-redirect-node-heroku/) 
 if(env === 'production'){
   app.use(function(req, res, next) {
     if(req.headers['x-forwarded-proto'] != 'https'){

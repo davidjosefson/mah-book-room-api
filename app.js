@@ -11,7 +11,20 @@ var bookings = require('./routes/bookings');
 var rooms = require('./routes/rooms');
 var times = require('./routes/times');
 
+var env = process.env.NODE_ENV || 'development';
+
 var app = express();
+
+// redirects to HTTPS on Heroku (http://jaketrent.com/post/https-redirect-node-heroku/)
+if(env === 'production'){
+  app.use(function(req, res, next) {
+    if(req.headers['x-forwarded-proto'] != 'https'){
+      return res.redirect(301, "https://" + (req.header('host')) + req.url);
+    } else {
+      return next();
+    }
+  });
+}
 
 // enables pre-flight CORS for all routes
 app.options('*', cors());

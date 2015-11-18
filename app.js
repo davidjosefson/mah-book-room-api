@@ -19,7 +19,7 @@ var app = express();
 if(env === 'production'){
   app.use(function(req, res, next) {
     if(req.headers['x-forwarded-proto'] != 'https'){
-      return res.redirect("https://" + (req.header('host')) + req.url);
+      return res.redirect(301, "https://" + (req.header('host')) + req.url);
     } else {
       return next();
     }

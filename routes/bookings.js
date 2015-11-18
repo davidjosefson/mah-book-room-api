@@ -1,8 +1,10 @@
 var express = require('express');
 var request = require('request');
 var bookingModel = require('../models/booking');
+var bookingModelGet = require('../models/booking_object');
 var basicAuth = require('basic-auth');
 var validators = require('../utils/validators');
+var htmlToText = require('html-to-text');
 var router = express.Router();
 
 /* GET to /bookings: get all bookings for user */
@@ -15,7 +17,28 @@ router.get('/', validateUserAndPass, function(req, res, next) {
           request({ method: 'POST', url: 'https://schema.mah.se/login_do.jsp', form: { username: user, password: pass }, jar: j }, function(err, httpResponse, body) {
               if (!err) {
                   request({method: 'GET', url: 'https://schema.mah.se/minaresursbokningar.jsp?flik=FLIK-0017&datum=15-11-18', jar: j}, function(err, httpResponse, body) {
-                      res.send(httpResponse.body);
+                      var text = htmlToText.fromString(httpResponse.body, {wordwrap: 1});
+                      var textArray = text.split('\n');
+                      if (textArray[18] === 'Inga') {
+                          return res.send('Inga bokningar idag');
+                      } else {
+                          var result = [];
+                          var i = 18;
+                          while (textArray[i] != 'Kommande') {
+                              var date = textArray[i];
+                              i += 2;
+                              var time = textArray[i++] + textArray[i++] + textArray[i++];
+                              i++;
+                              var room = textArray[i++];
+                              var status = textArray[i++];
+                              var passed = false;
+                              if (status.trim() === 'Passerad') {
+                                  passed = true;
+                              }
+                              result.push(bookingModelGet.getBooking(room, time, date, passed));
+                          }
+                          return res.send(result);
+                      }
                   });
               }
           });

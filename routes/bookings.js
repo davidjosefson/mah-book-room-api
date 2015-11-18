@@ -7,7 +7,20 @@ var router = express.Router();
 
 /* GET to /bookings: get all bookings for user */
 router.get('/', validateUserAndPass, function(req, res, next) {
-  res.send('GET BOOKINGS');
+    var j = request.jar();
+    request({url: 'https://schema.mah.se/resursbokning.jsp?flik=FLIK-0017', jar: j }, function(err, httpResponse, bodyHandshake) {
+        if (!err) {
+            var user = req.userAndPassValidationResult.name;
+            var pass = req.userAndPassValidationResult.pass;
+          request({ method: 'POST', url: 'https://schema.mah.se/login_do.jsp', form: { username: user, password: pass }, jar: j }, function(err, httpResponse, body) {
+              if (!err) {
+                  request({method: 'GET', url: 'https://schema.mah.se/minaresursbokningar.jsp?flik=FLIK-0017&datum=15-11-18', jar: j}, function(err, httpResponse, body) {
+                      res.send(httpResponse.body);
+                  });
+              }
+          });
+        }
+    });
 });
 
 /* POST to /bookings: create a booking */

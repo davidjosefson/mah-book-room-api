@@ -29,7 +29,7 @@ router.get('/', validateUserAndPass, function(req, res, next) {
         if (!err) {
           request({
             method: 'GET',
-            url: 'https://schema.mah.se/minaresursbokningar.jsp?flik=FLIK-0017&datum=15-11-18',
+            url: 'https://schema.mah.se/minaresursbokningar.jsp?flik=FLIK-0017&datum=15-11-18', // the exact date doesn't matter, but the date-parameter has to be present
             jar: j
           }, function(err, httpResponse, body) {
             var text = htmlToText.fromString(httpResponse.body, {
@@ -52,7 +52,7 @@ router.get('/', validateUserAndPass, function(req, res, next) {
 
 /*
 Subroutine for /get bookings
-Returns response to user with alls bookings if there are any.
+Returns response to user with all bookings if there are any.
  */
 function createBookings(res, textArray) {
   var result = [];

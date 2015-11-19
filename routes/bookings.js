@@ -9,42 +9,75 @@ var router = express.Router();
 
 /* GET to /bookings: get all bookings for user */
 router.get('/', validateUserAndPass, function(req, res, next) {
-    var j = request.jar();
-    request({url: 'https://schema.mah.se/resursbokning.jsp?flik=FLIK-0017', jar: j }, function(err, httpResponse, bodyHandshake) {
+  var j = request.jar();
+  request({
+    url: 'https://schema.mah.se/resursbokning.jsp?flik=FLIK-0017',
+    jar: j
+  }, function(err, httpResponse, bodyHandshake) {
+    if (!err) {
+      var user = req.userAndPassValidationResult.name;
+      var pass = req.userAndPassValidationResult.pass;
+      request({
+        method: 'POST',
+        url: 'https://schema.mah.se/login_do.jsp',
+        form: {
+          username: user,
+          password: pass
+        },
+        jar: j
+      }, function(err, httpResponse, body) {
         if (!err) {
-            var user = req.userAndPassValidationResult.name;
-            var pass = req.userAndPassValidationResult.pass;
-          request({ method: 'POST', url: 'https://schema.mah.se/login_do.jsp', form: { username: user, password: pass }, jar: j }, function(err, httpResponse, body) {
-              if (!err) {
-                  request({method: 'GET', url: 'https://schema.mah.se/minaresursbokningar.jsp?flik=FLIK-0017&datum=15-11-18', jar: j}, function(err, httpResponse, body) {
-                      var text = htmlToText.fromString(httpResponse.body, {wordwrap: 1});
-                      var textArray = text.split('\n');
-                      if (textArray[18] === 'Inga') {
-                          return res.send('Inga bokningar idag');
-                      } else {
-                          var result = [];
-                          var i = 18;
-                          while (textArray[i] != 'Kommande') {
-                              var date = textArray[i];
-                              i += 2;
-                              var time = textArray[i++] + textArray[i++] + textArray[i++];
-                              i++;
-                              var room = textArray[i++];
-                              var status = textArray[i++];
-                              var passed = false;
-                              if (status.trim() === 'Passerad') {
-                                  passed = true;
-                              }
-                              result.push(bookingModelGet.getBooking(room, time, date, passed));
-                          }
-                          return res.send(result);
-                      }
-                  });
+          request({
+            method: 'GET',
+            url: 'https://schema.mah.se/minaresursbokningar.jsp?flik=FLIK-0017&datum=15-11-18',
+            jar: j
+          }, function(err, httpResponse, body) {
+            var text = htmlToText.fromString(httpResponse.body, {
+              wordwrap: 1
+            });
+            var textArray = text.split('\n');
+            console.log(textArray);
+            if (textArray[18] === 'Inga') {
+              return res.send('Inga bokningar idag');
+            } else {
+              var result = [];
+              var i = 18;
+              while (i != -1) {
+                var date = textArray[i];
+                i += 2;
+                var time = textArray[i++] + textArray[i++] + textArray[i++];
+                i++;
+                var room = textArray[i++];
+                var status = textArray[i++];
+                var passed = false;
+                if (status.trim() === 'Passerad') {
+                  passed = true;
+                }
+                result.push(bookingModelGet.getBooking(room, time, date, passed));
+                i = findNextDate(i, textArray);
               }
+              return res.send(result);
+            }
           });
         }
-    });
+      });
+    }
+  });
 });
+
+function findNextDate(i, textArray) {
+  var d = new Date();
+  var n = d.toISOString();
+  n = n.substring(2, 10);
+  for (; i < textArray.length; i++) {
+    if (textArray[i].trim() === n) {
+      return i;
+    } else if (textArray[i].trim() === 'Kommande') {
+      return -1;
+    }
+  }
+  return -1;
+}
 
 /* POST to /bookings: create a booking */
 router.post('/', validateUserAndPass, validatePostBody, function(req, res, next) {

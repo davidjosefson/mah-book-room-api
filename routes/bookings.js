@@ -3,12 +3,107 @@ var request = require('request');
 var bookingModel = require('../models/booking');
 var basicAuth = require('basic-auth');
 var validators = require('../utils/validators');
+var htmlToText = require('html-to-text');
 var router = express.Router();
+var formatter = require('../utils/booking_formatter');
 
 /* GET to /bookings: get all bookings for user */
 router.get('/', validateUserAndPass, function(req, res, next) {
-  res.send('GET BOOKINGS');
+  var j = request.jar();
+  request({
+    url: 'https://schema.mah.se/resursbokning.jsp?flik=FLIK-0017',
+    jar: j
+  }, function(err, httpResponse, bodyHandshake) {
+    if (!err) {
+      var user = req.userAndPassValidationResult.name;
+      var pass = req.userAndPassValidationResult.pass;
+      request({
+        method: 'POST',
+        url: 'https://schema.mah.se/login_do.jsp',
+        form: {
+          username: user,
+          password: pass
+        },
+        jar: j
+      }, function(err, httpResponse, body) {
+        if (!err) {
+          request({
+            method: 'GET',
+            url: 'https://schema.mah.se/minaresursbokningar.jsp?flik=FLIK-0017&datum=15-11-18',
+            jar: j
+          }, function(err, httpResponse, body) {
+            var text = htmlToText.fromString(httpResponse.body, {
+              wordwrap: 1
+            });
+            var textArray = text.split('\n');
+            if (textArray[18] === 'Inga') {
+              return res.send({
+                bookings: []
+              });
+            } else {
+              return createBookings(res, textArray);
+            }
+          });
+        }
+      });
+    }
+  });
 });
+
+/*
+Subroutine for /get bookings
+Returns response to user with alls bookings if there are any.
+ */
+function createBookings(res, textArray) {
+  var result = [];
+  var i = 18;
+  while (i != -1) {
+    var date = textArray[i];
+    i += 2;
+    var time = textArray[i++] + textArray[i++] + textArray[i++];
+    i++;
+    var room = textArray[i++];
+    i++;
+
+    if (date !== undefined && time !== undefined && room !== undefined) {
+      date = formatter.formatDateFromMAH(date.trim());
+      time = formatter.formatTimeFromMAH(time.trim());
+      room = formatter.formatRoomFromMAH(room.trim());
+
+      if (validators.room(room).id === room && validators.time(time).id === time && validators.date(date) === date) {
+        result.push(bookingModel.getSingleBooking(room, date, time));
+        i = findNextDate(i, textArray);
+      } else {
+        return res.status(500).json({
+          status: 500,
+          error: 'The data retreived from MAH\'s booking system was incorrect. Contact the administrator of this system'
+        });
+      }
+    } else {
+      return res.status(500).json({
+        status: 500,
+        error: 'The data retreived from MAH\'s booking system was incorrect. Contact the administrator of this system'
+      });
+    }
+  }
+  return res.send({
+    bookings: result
+  });
+}
+
+function findNextDate(i, textArray) {
+  var d = new Date();
+  var n = d.toISOString();
+  n = n.substring(2, 10);
+  for (; i < textArray.length; i++) {
+    if (textArray[i].trim() === n) {
+      return i;
+    } else if (textArray[i].trim() === 'Kommande') {
+      return -1;
+    }
+  }
+  return -1;
+}
 
 /* POST to /bookings: create a booking */
 router.post('/', validateUserAndPass, validatePostBody, function(req, res, next) {

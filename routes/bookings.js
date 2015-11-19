@@ -10,6 +10,9 @@ var formatter = require('../utils/booking_formatter');
 /* GET to /bookings: get all bookings for user */
 router.get('/', validateUserAndPass, function(req, res, next) {
   var j = request.jar();
+  var d = new Date();
+  var n = d.toISOString();
+  n = n.substring(2, 10);
   request({
     url: 'https://schema.mah.se/resursbokning.jsp?flik=FLIK-0017',
     jar: j
@@ -29,7 +32,7 @@ router.get('/', validateUserAndPass, function(req, res, next) {
         if (!err) {
           request({
             method: 'GET',
-            url: 'https://schema.mah.se/minaresursbokningar.jsp?flik=FLIK-0017&datum=15-11-18', // the exact date doesn't matter, but the date-parameter has to be present
+            url: 'https://schema.mah.se/minaresursbokningar.jsp?flik=FLIK-0017&datum=' + n,
             jar: j
           }, function(err, httpResponse, body) {
             var text = htmlToText.fromString(httpResponse.body, {
@@ -52,7 +55,7 @@ router.get('/', validateUserAndPass, function(req, res, next) {
 
 /*
 Subroutine for /get bookings
-Returns response to user with all bookings if there are any.
+Returns all bookings to the user if there are any.
  */
 function createBookings(res, textArray) {
   var result = [];
@@ -92,13 +95,14 @@ function createBookings(res, textArray) {
 }
 
 function findNextDate(i, textArray) {
+  console.log(textArray);
   var d = new Date();
   var n = d.toISOString();
-  n = n.substring(2, 10);
+  n = n.substring(2, 5);
   for (; i < textArray.length; i++) {
-    if (textArray[i].trim() === n) {
+    if (textArray[i].trim().substring(0, 3) === n && textArray[i + 1] === '[#] ') {
       return i;
-    } else if (textArray[i].trim() === 'Kommande') {
+    } else if (textArray[i].trim() === 'Bokningsregler') {
       return -1;
     }
   }

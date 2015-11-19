@@ -1,11 +1,11 @@
 var express = require('express');
 var request = require('request');
 var bookingModel = require('../models/booking');
-var bookingModelGet = require('../models/booking_object');
 var basicAuth = require('basic-auth');
 var validators = require('../utils/validators');
 var htmlToText = require('html-to-text');
 var router = express.Router();
+var formatter = require('../utils/booking_formatter');
 
 /* GET to /bookings: get all bookings for user */
 router.get('/', validateUserAndPass, function(req, res, next) {
@@ -36,27 +36,12 @@ router.get('/', validateUserAndPass, function(req, res, next) {
               wordwrap: 1
             });
             var textArray = text.split('\n');
-            console.log(textArray);
             if (textArray[18] === 'Inga') {
-              return res.send('Inga bokningar idag');
+              return res.send({
+                bookings: []
+              });
             } else {
-              var result = [];
-              var i = 18;
-              while (i != -1) {
-                var date = textArray[i];
-                i += 2;
-                var time = textArray[i++] + textArray[i++] + textArray[i++];
-                i++;
-                var room = textArray[i++];
-                var status = textArray[i++];
-                var passed = false;
-                if (status.trim() === 'Passerad') {
-                  passed = true;
-                }
-                result.push(bookingModelGet.getBooking(room, time, date, passed));
-                i = findNextDate(i, textArray);
-              }
-              return res.send(result);
+              return createBookings(res, textArray);
             }
           });
         }
@@ -64,6 +49,47 @@ router.get('/', validateUserAndPass, function(req, res, next) {
     }
   });
 });
+
+/*
+Subroutine for /get bookings
+Returns response to user with alls bookings if there are any.
+ */
+function createBookings(res, textArray) {
+  var result = [];
+  var i = 18;
+  while (i != -1) {
+    var date = textArray[i];
+    i += 2;
+    var time = textArray[i++] + textArray[i++] + textArray[i++];
+    i++;
+    var room = textArray[i++];
+    i++;
+
+    if (date !== undefined && time !== undefined && room !== undefined) {
+      date = formatter.formatDateFromMAH(date.trim());
+      time = formatter.formatTimeFromMAH(time.trim());
+      room = formatter.formatRoomFromMAH(room.trim());
+
+      if (validators.room(room).id === room && validators.time(time).id === time && validators.date(date) === date) {
+        result.push(bookingModel.getSingleBooking(room, date, time));
+        i = findNextDate(i, textArray);
+      } else {
+        return res.status(500).json({
+          status: 500,
+          error: 'The data retreived from MAH\'s booking system was incorrect. Contact the administrator of this system'
+        });
+      }
+    } else {
+      return res.status(500).json({
+        status: 500,
+        error: 'The data retreived from MAH\'s booking system was incorrect. Contact the administrator of this system'
+      });
+    }
+  }
+  return res.send({
+    bookings: result
+  });
+}
 
 function findNextDate(i, textArray) {
   var d = new Date();

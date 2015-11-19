@@ -55,7 +55,7 @@ router.get('/', validateUserAndPass, function(req, res, next) {
 
 /*
 Subroutine for /get bookings
-Returns response to user with all bookings if there are any.
+Returns all bookings to the user if there are any.
  */
 function createBookings(res, textArray) {
   var result = [];

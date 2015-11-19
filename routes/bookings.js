@@ -95,13 +95,14 @@ function createBookings(res, textArray) {
 }
 
 function findNextDate(i, textArray) {
+  console.log(textArray);
   var d = new Date();
   var n = d.toISOString();
-  n = n.substring(2, 10);
+  n = n.substring(2, 5);
   for (; i < textArray.length; i++) {
-    if (textArray[i].trim() === n) {
+    if (textArray[i].trim().substring(0, 3) === n && textArray[i + 1] === '[#] ') {
       return i;
-    } else if (textArray[i].trim() === 'Kommande') {
+    } else if (textArray[i].trim() === 'Bokningsregler') {
       return -1;
     }
   }

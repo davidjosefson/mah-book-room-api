@@ -21,7 +21,7 @@ validators.time = function(time) {
   } else if (typeof time != 'string')  {
     return new Error('Time was not a string.'); 
   } else if ((validTime = constants.TIMES[time]) === undefined) {
-    return new Error('\'' + time + '\' is not a valid room. See endpoint /times for a list of valid times to use.');
+    return new Error('\'' + time + '\' is not a valid time. See endpoint /times for a list of valid times to use.');
   }
   return validTime;
 }

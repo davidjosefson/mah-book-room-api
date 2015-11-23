@@ -38,13 +38,15 @@ router.get('/', validateUserAndPass, function(req, res, next) {
             var text = htmlToText.fromString(httpResponse.body, {
               wordwrap: 1
             });
+
             var textArray = text.split('\n');
-            if (textArray[18] === 'Inga') {
+            var firstdate = findNextDate(0, textArray);
+            if (firstdate === -1) {
               return res.send({
                 bookings: []
               });
             } else {
-              return createBookings(res, textArray);
+              return createBookings(res, textArray, firstdate);
             }
           });
         }
@@ -57,9 +59,8 @@ router.get('/', validateUserAndPass, function(req, res, next) {
 Subroutine for /get bookings
 Returns response to user with alls bookings if there are any.
  */
-function createBookings(res, textArray) {
+function createBookings(res, textArray, i) {
   var result = [];
-  var i = 18;
   while (i != -1) {
     var date = textArray[i];
     i += 2;
@@ -100,7 +101,7 @@ function findNextDate(i, textArray) {
   var n = d.toISOString();
   n = n.substring(2, 5);
   for (; i < textArray.length; i++) {
-    if (textArray[i].trim().substring(0, 3) === n && textArray[i + 1] === '[#] ') {
+    if (textArray[i + 1] === '[#] ' && textArray[i].trim().substring(0, 3) === n) {
       return i;
     } else if (textArray[i].trim() === 'Bokningsregler') {
       return -1;

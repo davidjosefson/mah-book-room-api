@@ -21,7 +21,7 @@ validators.time = function(time) {
   } else if (typeof time != 'string')  {
     return new Error('Time was not a string.'); 
   } else if ((validTime = constants.TIMES[time]) === undefined) {
-    return new Error('\'' + time + '\' is not a valid room. See endpoint /times for a list of valid times to use.');
+    return new Error('\'' + time + '\' is not a valid time. See endpoint /times for a list of valid times to use.');
   }
   return validTime;
 }
@@ -32,7 +32,7 @@ validators.date = function(date) {
   } else if (typeof date != 'string')  {
     return new Error('Date was not a string.');
   } else if (!date.match(/\b(\d{4})-(\d{2})-(\d{2})\b/))  {
-    return new Error('\'' + date + '\' is not a valid date. Has to be in ISO 8106-format YYYY-MM-DD, example: \'2016-01-15\'');
+    return new Error('\'' + date + '\' is not a valid date. It has to be in ISO 8106-format YYYY-MM-DD, example: \'2016-01-15\'');
   }
   return date;
 }

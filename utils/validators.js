@@ -32,7 +32,7 @@ validators.date = function(date) {
   } else if (typeof date != 'string')  {
     return new Error('Date was not a string.');
   } else if (!date.match(/\b(\d{4})-(\d{2})-(\d{2})\b/))  {
-    return new Error('\'' + date + '\' is not a valid date. Has to be in ISO 8106-format YYYY-MM-DD, example: \'2016-01-15\'');
+    return new Error('\'' + date + '\' is not a valid date. It has to be in ISO 8106-format YYYY-MM-DD, example: \'2016-01-15\'');
   }
   return date;
 }

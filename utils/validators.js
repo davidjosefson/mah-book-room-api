@@ -12,7 +12,7 @@ validators.room = function(room)  {
     return new Error('\'' + room + '\' is not a valid room. See endpoint /rooms for a list of valid rooms to use.');
   }
   return validRoom;
-}
+};
 
 validators.time = function(time) {
   var validTime;
@@ -24,7 +24,7 @@ validators.time = function(time) {
     return new Error('\'' + time + '\' is not a valid time. See endpoint /times for a list of valid times to use.');
   }
   return validTime;
-}
+};
 
 validators.date = function(date) {
   if (date === null || date === undefined) {
@@ -35,6 +35,18 @@ validators.date = function(date) {
     return new Error('\'' + date + '\' is not a valid date. It has to be in ISO 8106-format YYYY-MM-DD, example: \'2016-01-15\'');
   }
   return date;
-}
+};
+
+validators.comment = function(comment){
+  if (comment === null || comment === undefined) {
+    // comment is optional, no error here
+    return " ";
+  } else if (typeof comment != 'string') {
+    return new Error('Comment was not a string.');
+  } else if (comment === "") {
+    return " ";
+  }
+  return comment;
+};
 
 module.exports = validators;

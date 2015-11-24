@@ -69,13 +69,21 @@ function createBookings(res, textArray, i) {
     var room = textArray[i++];
     i++;
 
+    /* Comment */
+    var comment = null;
+    var commentPosition = i + 1;
+    var nextDateIndex = findNextDate(i, textArray);
+    if(nextDateIndex != commentPosition && nextDateIndex != -1) {
+      comment = textArray[commentPosition].trim();
+    }
+
     if (date !== undefined && time !== undefined && room !== undefined) {
       date = formatter.formatDateFromMAH(date.trim());
       time = formatter.formatTimeFromMAH(time.trim());
       room = formatter.formatRoomFromMAH(room.trim());
 
       if (validators.room(room).id === room && validators.time(time).id === time && validators.date(date) === date) {
-        result.push(bookingModel.getSingleBooking(room, date, time));
+        result.push(bookingModel.getSingleBooking(room, date, time, comment));
         i = findNextDate(i, textArray);
       } else {
         return res.status(500).json({
@@ -96,7 +104,6 @@ function createBookings(res, textArray, i) {
 }
 
 function findNextDate(i, textArray) {
-  console.log(textArray);
   var d = new Date();
   var n = d.toISOString();
   n = n.substring(2, 5);
@@ -114,7 +121,7 @@ function findNextDate(i, textArray) {
 router.post('/', validateUserAndPass, validatePostBody, function(req, res, next) {
   performExternalBooking(req.userAndPassValidationResult, req.postBodyValidationResult, function(err, result)  {
     if (!err) {
-      var booking = bookingModel.getSingleBooking(req.postBodyValidationResult.room.id, req.postBodyValidationResult.date, req.postBodyValidationResult.time.id);
+      var booking = bookingModel.getSingleBooking(req.postBodyValidationResult.room.id, req.postBodyValidationResult.date, req.postBodyValidationResult.time.id, req.postBodyValidationResult.comment);
       res.json(booking);
     } else  {
       res.status(err.status).json({
@@ -131,6 +138,7 @@ function performExternalBooking(userAndPassword, postBodyObjects, callback)  {
   var room = postBodyObjects.room.urlRoom;
   var time = postBodyObjects.time.urlTime;
   var date = stripTwoDigitsFromYear(postBodyObjects.date);
+  var comment = postBodyObjects.comment;
 
   // sets a new cookie jar for each request
   var j = request.jar();
@@ -153,7 +161,7 @@ function performExternalBooking(userAndPassword, postBodyObjects, callback)  {
       }, function(err, httpResponse, body) {
         // Booking request
         if (!err) {
-          var url = 'https://schema.mah.se/ajax/ajax_resursbokning.jsp?op=boka&datum=' + date + '&id=' + room + '&typ=RESURSER_LOKALER&intervall=' + time + '&moment= &flik=FLIK-0017';
+          var url = 'https://schema.mah.se/ajax/ajax_resursbokning.jsp?op=boka&datum=' + date + '&id=' + room + '&typ=RESURSER_LOKALER&intervall=' + time + '&moment=' + comment + '&flik=FLIK-0017';
           request({
             url: url,
             jar: j
@@ -213,7 +221,7 @@ function performExternalBooking(userAndPassword, postBodyObjects, callback)  {
 
 var stripTwoDigitsFromYear = function(date) {
   return date.substring(2);
-}
+};
 
 function validateUserAndPass(req, res, next) {
   var user = basicAuth(req);
@@ -233,6 +241,7 @@ function validatePostBody(req, res, next) {
   var roomResult = validators.room(req.body.room);
   var dateResult = validators.date(req.body.date);
   var timeResult = validators.time(req.body.time);
+  var commentResult = validators.comment(req.body.comment);
   var combinedError = [];
 
   if (roomResult instanceof Error) {
@@ -250,6 +259,11 @@ function validatePostBody(req, res, next) {
       error: timeResult.message
     });
   }
+  if (commentResult instanceof Error) {
+    combinedError.push({
+      error: commentResult.message
+    });
+  }
 
   if (combinedError.length > 0) {
     res.status(400).json(combinedError);
@@ -258,6 +272,7 @@ function validatePostBody(req, res, next) {
     req.postBodyValidationResult.room = roomResult;
     req.postBodyValidationResult.date = dateResult;
     req.postBodyValidationResult.time = timeResult;
+    req.postBodyValidationResult.comment = commentResult;
 
     next();
   }

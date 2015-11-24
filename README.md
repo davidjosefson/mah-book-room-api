@@ -125,11 +125,15 @@ The POST body needs to be valid JSON and include the following attributes:
 * `date` - a valid date according to [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601), e.g. 2015-10-21
 * `time` - a valid time id
 
+##### Optional attribute
+* `comment` - a comment to go with the booking
+
 ```json
 {
   "room": "nia0301",
   "date": "2015-12-24",
-  "time": "10151300"
+  "time": "10151300",
+  "comment": "Group assignment 2"
 }
 ```
 

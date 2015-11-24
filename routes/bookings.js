@@ -60,9 +60,6 @@ Subroutine for /get bookings
 Returns all bookings to the user if there are any.
  */
 function createBookings(res, textArray, i) {
-  for (var j = 0; j < textArray.length; j++) {
-    console.log(j + ": " + textArray[j]);
-  }
   var result = [];
   while (i != -1) {
     var date = textArray[i];
@@ -72,6 +69,7 @@ function createBookings(res, textArray, i) {
     var room = textArray[i++];
     i++;
 
+    /* Comment */
     var comment = null;
     var commentPosition = i + 1;
     var nextDateIndex = findNextDate(i, textArray);

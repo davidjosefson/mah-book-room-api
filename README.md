@@ -33,6 +33,7 @@ Provides an array of all rooms available for booking rooms through the API.
       {  
          "id":"nia0301",
          "name":"NI:A0301",
+         "seats": 20,
          "_links":{  
             "self":{  
                "href":"/rooms/nia0301"
@@ -40,11 +41,12 @@ Provides an array of all rooms available for booking rooms through the API.
          }
       },
       {  
-         "id":"nia0302",
-         "name":"NI:A0302",
+         "id":"nia0304",
+         "name":"NI:A0304",
+         "seats": 10,
          "_links":{  
             "self":{  
-               "href":"/rooms/nia0302"
+               "href":"/rooms/nia0304"
             }
          }
       },

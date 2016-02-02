@@ -1,6 +1,6 @@
 {
   "name": "mah-book-room-api",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "scripts": {
     "start": "node ./bin/www",
     "test": "mocha test/*",
@@ -29,9 +29,9 @@
     "node": "0.12.x"
   },
   "devDependencies": {
-    "coveralls": "^2.11.6",
-    "istanbul": "^0.4.2",
+    "coveralls": "~2.11.6",
+    "istanbul": "~0.4.2",
     "mocha": "~2.4.5",
-    "mocha-lcov-reporter": "^1.0.0"
+    "mocha-lcov-reporter": "~1.0.0"
   }
 }

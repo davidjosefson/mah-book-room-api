@@ -42,19 +42,19 @@ describe('Testing the validators', function()  {
       expect(validators.room()).to.be.an.instanceof(Error);
     });
     it('should return false if input is an int', function()  {
-      expect(validators.room(0506)).to.be.an.instanceof(Error);
+      expect(validators.room(0515)).to.be.an.instanceof(Error);
     });
     it('should return false if input formatted correctly but not listed in constants.ROOMS', function()  {
       expect(validators.room('nia0909')).to.be.an.instanceof(Error);
     });
     it('should return false if input is formatted as the urlRoom', function()  {
-      expect(validators.room('NI%3AA0506')).to.be.an.instanceof(Error);
+      expect(validators.room('NI%3AA0515')).to.be.an.instanceof(Error);
     });
     it('should return false if input is formatted as the room name', function()  {
-      expect(validators.room('NI:A0506')).to.be.an.instanceof(Error);
+      expect(validators.room('NI:A0515')).to.be.an.instanceof(Error);
     });
     it('should return true if input is an id listed in constants.ROOMS', function()  {
-      expect(validators.room('nia0506')).to.equal(constants.ROOMS['nia0506']);
+      expect(validators.room('nia0515')).to.equal(constants.ROOMS['nia0515']);
     });
   });
 

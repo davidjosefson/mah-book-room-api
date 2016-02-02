@@ -23,6 +23,6 @@
     "node": "0.12.x"
   },
   "devDependencies": {
-    "mocha": "^2.4.5"
+    "mocha": "~2.4.5"
   }
 }

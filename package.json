@@ -3,7 +3,7 @@
   "version": "0.3.1",
   "scripts": {
     "start": "node ./bin/www",
-    "test": "mocha --recursive test/",
+    "test": "mocha test/*",
     "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec test/*",
     "coveralls": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec test/* && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
   },

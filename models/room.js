@@ -3,6 +3,7 @@ var constants = require('../constants/constants');
 var Room = function(roomId) {
   this.id = constants.ROOMS[roomId].id;
   this.name = constants.ROOMS[roomId].name;
+  this.seats = constants.ROOMS[roomId].seats;
 
   this._links = {
     self: {

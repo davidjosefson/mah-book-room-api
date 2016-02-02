@@ -1,9 +1,15 @@
 {
   "name": "mah-book-room-api",
-  "version": "0.1.0",
+  "version": "0.4.0",
   "scripts": {
     "start": "node ./bin/www",
-    "test": "mocha --recursive test/"
+    "test": "mocha test/*",
+    "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec test/*",
+    "coveralls": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec test/* && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/davidjosefson/mah-book-room-api"
   },
   "dependencies": {
     "basic-auth": "~1.0.3",
@@ -21,5 +27,11 @@
   },
   "engines": {
     "node": "0.12.x"
+  },
+  "devDependencies": {
+    "coveralls": "~2.11.6",
+    "istanbul": "~0.4.2",
+    "mocha": "~2.4.5",
+    "mocha-lcov-reporter": "~1.0.0"
   }
 }
